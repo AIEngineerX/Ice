@@ -231,7 +231,12 @@ final class EventTap {
             guard !Task.isCancelled else {
                 return
             }
-            if self?.isEnabled == true {
+            guard let self else {
+                return
+            }
+            // A tap that was never created can't receive its event, so
+            // it must time out as well.
+            if machPort == nil || isEnabled {
                 onTimeout()
             }
         }

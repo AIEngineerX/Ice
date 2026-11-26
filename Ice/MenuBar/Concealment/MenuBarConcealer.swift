@@ -636,7 +636,7 @@ private enum AssessmentAssertion {
     /// MenuBarAgent numbers its system items from 0 (0 through 8 on macOS
     /// 27.0); numbers with no item behind them are ignored, so later ones
     /// are allowed too.
-    private static let systemItems = (0...63).map { NSNumber(value: $0) } as NSArray
+    private static let systemItems = (0...255).map { NSNumber(value: $0) } as NSArray
 
     private static let classes: (configuration: AnyClass, assertion: AnyClass)? = {
         guard

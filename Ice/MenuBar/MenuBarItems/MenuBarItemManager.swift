@@ -329,7 +329,7 @@ extension MenuBarItemManager {
                         let section = cache.section(for: targetItem),
                         let index = cache[section].firstIndex(matching: targetItem.info)
                     {
-                        let clampedIndex = (index - 1).clamped(to: cache[section].startIndex...cache[section].endIndex)
+                        let clampedIndex = (index + 1).clamped(to: cache[section].startIndex...cache[section].endIndex)
                         cache[section].insert(item, at: clampedIndex)
                     }
                 }
@@ -592,7 +592,7 @@ extension MenuBarItemManager {
     func waitForNoModifiersPressed(timeout: Duration? = nil) async throws {
         try await waitWithTask(timeout: timeout) {
             // Return early if no flags are pressed.
-            if NSEvent.modifierFlags.isEmpty {
+            if NSEvent.modifierFlags.isDisjoint(with: [.command, .option, .control, .shift]) {
                 return
             }
 
@@ -605,7 +605,7 @@ extension MenuBarItemManager {
                 )
                 .removeDuplicates()
                 .sink { _ in
-                    if NSEvent.modifierFlags.isEmpty {
+                    if NSEvent.modifierFlags.isDisjoint(with: [.command, .option, .control, .shift]) {
                         cancellable?.cancel()
                         continuation.resume()
                     }
@@ -1392,6 +1392,10 @@ extension MenuBarItemManager {
         // Remove all items up to the hidden control item.
         items.trimPrefix { $0.info != .hiddenControlItem }
         // Remove the hidden control item.
+        guard !items.isEmpty else {
+            Logger.itemManager.warning("Missing control item for hidden section, so not showing \(item.logString)")
+            return
+        }
         items.removeFirst()
         // Remove all offscreen items.
         items.trimPrefix { !$0.isOnScreen }
